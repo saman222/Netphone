@@ -52,8 +52,12 @@ angular.module('mm.core.login', [])
         url: '/site',
         templateUrl: 'core/components/login/templates/site.html',
         controller: 'mmLoginSiteCtrl'
-		onEnter: function($ionicNavBarDelegate, $ionicHistory, $mmSitesManager, $state) {$state.go('mm_login.credentials', {siteurl: 'http://lms.netroshd.ir'});
-		}
+		/* onEnter: function($ionicNavBarDelegate, $ionicHistory, $mmSitesManager, $state) {$state.go('mm_login.credentials', {siteurl: 'http://lms.netroshd.ir'});
+		} */
+		 onEnter: function($state) {
+        $state.go('mm_login.credentials', {siteurl: 'http://lms.netroshd.ir'});
+    }
+		
 	})
 
     .state('mm_login.credentials', {
@@ -61,7 +65,7 @@ angular.module('mm.core.login', [])
         templateUrl: 'core/components/login/templates/credentials.html',
         controller: 'mmLoginCredentialsCtrl',
         params: {
-            siteurl: ''
+            siteurl: 'http://lms.netroshd.ir/login/index.php'
         },
         onEnter: function($state, $stateParams) {
             // Do not allow access to this page when the URL was not passed.
