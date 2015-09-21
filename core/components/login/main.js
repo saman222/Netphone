@@ -43,7 +43,7 @@ angular.module('mm.core.login', [])
         onEnter: function($state, $mmSitesManager) {
             // Skip this page if there are no sites yet.
             //$mmSitesManager.hasNoSites().then(function() {
-                $state.go('mm_login.site');
+                $state.go('mm_login.credentials');
             
         }
     })
