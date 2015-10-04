@@ -14,7 +14,7 @@
 
 angular.module('mm.core.login', [])
 
-.config(function($stateProvider, $urlRouterProvider, $mmInitDelegateProvider, mmInitDelegateMaxAddonPriority) {
+.config(function($stateProvider, $urlRouterProvider) {
 
     $stateProvider
 
@@ -42,9 +42,9 @@ angular.module('mm.core.login', [])
         controller: 'mmLoginSitesCtrl',
         onEnter: function($state, $mmSitesManager) {
             // Skip this page if there are no sites yet.
-            $mmSitesManager.hasNoSites().then(function() {
+           // $mmSitesManager.hasNoSites().then(function() {
                 $state.go('mm_login.site');
-            });
+            //});
         }
     })
 
@@ -52,20 +52,17 @@ angular.module('mm.core.login', [])
         url: '/site',
         templateUrl: 'core/components/login/templates/site.html',
         controller: 'mmLoginSiteCtrl'
-		/* onEnter: function($ionicNavBarDelegate, $ionicHistory, $mmSitesManager, $state) {$state.go('mm_login.credentials', {siteurl: 'http://lms.netroshd.ir'});
-		} */
-		 onEnter: function($state) {
-        $state.go('mm_login.credentials', {siteurl: 'http://lms.netroshd.ir'});
-    }
-		
-	})
+         onEnter: function($state) {
+        $state.go('mm_login.credentials', {siteurl: 'http://lms.netrosh.ir'});
+         }
+    })
 
     .state('mm_login.credentials', {
         url: '/cred',
         templateUrl: 'core/components/login/templates/credentials.html',
         controller: 'mmLoginCredentialsCtrl',
         params: {
-            siteurl: 'http://lms.netroshd.ir/login/index.php'
+            siteurl: ''
         },
         onEnter: function($state, $stateParams) {
             // Do not allow access to this page when the URL was not passed.
@@ -93,12 +90,10 @@ angular.module('mm.core.login', [])
         return $state.href('mm_login.init').replace('#', '');
     });
 
-    // Restore the session.
-    $mmInitDelegateProvider.registerProcess('mmLogin', '$mmSitesManager.restoreSession', mmInitDelegateMaxAddonPriority + 200);
 })
 
 .run(function($log, $state, $mmUtil, $translate, $mmSitesManager, $rootScope, $mmSite, $mmURLDelegate, $ionicHistory,
-                $mmEvents, $mmLoginHelper, mmCoreEventSessionExpired, $mmApp) {
+                $mmEvents, $mmLoginHelper, mmCoreEventSessionExpired) {
 
     $log = $log.getInstance('mmLogin');
 
@@ -110,14 +105,6 @@ angular.module('mm.core.login', [])
 
     // Redirect depending on user session.
     $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
-
-        // Prevent state changes while the app is not ready.
-        if (!$mmApp.isReady() && toState.name !== 'mm_login.init') {
-            event.preventDefault();
-            $state.transitionTo('mm_login.init');
-            $log.warn('Forbidding state change to \'' + toState.name + '\'. App is not ready yet.');
-            return;
-        }
 
         if (toState.name.substr(0, 8) === 'redirect') {
             return;
@@ -158,11 +145,6 @@ angular.module('mm.core.login', [])
 
             // Check authentication method.
             $mmSitesManager.checkSite(siteurl).then(function(result) {
-
-                if (result.warning) {
-                    $mmUtil.showErrorModal(result.warning, true, 4000);
-                }
-
                 if ($mmLoginHelper.isSSOLoginNeeded(result.code)) {
                     // SSO. User needs to authenticate in a browser.
                     $mmUtil.showConfirm($translate('mm.login.reconnectssodescription')).then(function() {
@@ -171,7 +153,6 @@ angular.module('mm.core.login', [])
                 } else {
                     var info = $mmSite.getInfo();
                     if (typeof(info) !== 'undefined' && typeof(info.username) !== 'undefined') {
-                        $ionicHistory.nextViewOptions({disableBack: true});
                         $state.go('mm_login.reconnect', {siteurl: siteurl, username: info.username, infositeurl: info.siteurl});
                     }
                 }
